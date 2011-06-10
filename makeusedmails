@@ -1,0 +1,26 @@
+#!/usr/bin/php
+<?
+$domain = "@example.com";
+$file = fopen("/var/lib/vpopmail/domains/exaple.com/vpasswd", "r");
+$file2 = fopen("/root/used_mails", "w"); # Where generate the log
+$file3 = fopen("/root/used_mails_remove", "w"); # Where generate the log with only the matchs
+while (!feof($file)) {
+        $fbuffer = fgets($file, 4096);
+        $fexplotado = explode(":",$fbuffer);
+        $login = trim($fexplotado[0]);
+	if($login != "") {
+		$auth = exec("/var/lib/vpopmail/bin/vuserinfo $login$domain -l");
+		$auth2 = "";
+		exec("/var/lib/vpopmail/bin/vuserinfo $login$domain -l", $auth2);
+		fputs($file2, "$login$domain --> ");
+		fputs($file2, "$auth\n");
+		if(ereg("Never", $auth2[0])) {
+			echo "$auth2[0]\n";
+			fputs($file3, "/var/lib/vpopmail/bin/vdeluser $login$domain\n");
+			}
+		}
+	}
+fclose($file);
+fclose($file2);
+fclose($file3);
+?>
